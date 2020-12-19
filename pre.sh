@@ -121,4 +121,3 @@ fi
 # rm_fabric_samples_dir
 
 change_dir_and_run_script
-
