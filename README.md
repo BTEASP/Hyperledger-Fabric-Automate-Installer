@@ -2,7 +2,7 @@
 
 ## RUN
 
-There are 2 different shell script file. The `pre.sh` file provides the commands that before running `gen.py` file. When your directory changed to **root** directory, you can run `pre_sudo.sh` command. If you are running `pre.sh` at the first time, you need to change mode of the script file with `chmod +x`. It basically changes the permission that it makes the file executable.
+There are 2 different shell script files. The `pre.sh` file provides the commands that before running `gen.py` file. When your directory changes to the root directory, you can run `pre_sudo.sh` command. If you are running `pre.sh` at the first time, you need to change the mode of the script file with `chmod +x`. It basically changes the permission that it makes the file executable.
 
 Example:
 
