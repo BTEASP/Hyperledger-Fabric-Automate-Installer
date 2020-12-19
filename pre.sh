@@ -49,9 +49,9 @@ function rm_fabric_samples_dir() {
 # Updates the source code
 function update_repository() {
 	echo "---------------------- Repository is updating ------------------------------"
-	cd ${PWD}/Hyperledger-Fabric-Automate-Installer/
+	# cd ${PWD}/Hyperledger-Fabric-Automate-Installer/
 	git pull origin master
-	cd ..
+	# cd ..
 	echo "----------------------------------------------------------------------------"
 }
 
@@ -73,7 +73,7 @@ function copy_binaries() {
 # Changes the directory and runs the script
 function change_dir_and_run_script() {
 	# Change directory
-	cd ${PWD}/Hyperledger-Fabric-Automate-Installer/
+	# cd ${PWD}/Hyperledger-Fabric-Automate-Installer/
 	sudo chmod 755 *
 	sudo ./env.sh
 }
@@ -92,29 +92,33 @@ while [[ $# -ge 1 ]]; do
 			echo "-u, --update		updates the repository"
 			exit 0
 			;;
-		-u)
+		-u | --update)
 			is_update_repository=true
 			shift
 			;;
 	esac
 done
 
-if [ -d "${PWD}/Hyperledger-Fabric-Automate-Installer/" ]; then
-	if $is_update_repository;  then
-		update_repository
-	fi
-else
-	clone_repository
+if $is_update_repository; then
+	update_repository
 fi
 
-if [ -d "${PWD}/fabric-samples/" ]; then
-	rm_fabric_samples_dir
-	install_binaries
-else
-	install_binaries
-fi
+# if [ -d "${PWD}/Hyperledger-Fabric-Automate-Installer/" ]; then
+#	if $is_update_repository;  then
+#		update_repository
+#		echo "Updating..."
+#	fi
+# fi
 
-copy_binaries
-rm_fabric_samples_dir
+# if [ -d "${PWD}/fabric-samples/" ]; then
+#	rm_fabric_samples_dir
+#	install_binaries
+# else
+#	install_binaries
+# fi
+
+# copy_binaries
+# rm_fabric_samples_dir
+
 change_dir_and_run_script
 
