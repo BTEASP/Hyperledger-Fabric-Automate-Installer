@@ -60,11 +60,14 @@ def createOrganisations(name, opt, host):
     return (rslt)
 
 #Part of configtx.yaml
-def createOrderer(typeorderer, messageCount, absoluteMaxBytes, preferredMaxBytes, host):
+def createOrderer(typeorderer, messageCount, absoluteMaxBytes, preferredMaxBytes, host,ordererNum):
     rslt = jumptab(2, 0) + "Orderer: &OrdererDefaults"
     rslt += jumptab(2, 1) + "OrdererType: " + typeorderer
     rslt += jumptab(2, 1) + "Addresses:"
-    rslt += jumptab(1, 2) + "- " + "orderer." + host + ".com:7050"
+    i=0
+    while (i <ordererNum ):
+        rslt += jumptab(1, 2) + "- " + "orderer" +str(i) +"." + host + ".com:7050"
+        i += 1
     rslt += jumptab(2, 1) + "BatchTimeout: 2s"
     rslt += jumptab(2, 1) + "BatchSize:"
     rslt += jumptab(2, 2) + "MaxMessageCount: " + messageCount
@@ -89,8 +92,8 @@ def setOrg(tab):
     return (rslt)
 
 #Call functions in order to create crypto-config.yaml
-def createCryptoconfig(tab):
-    buffer = ordererOrgConfig(tab[0])
+def createCryptoconfig(tab,ordererNum):
+    buffer = ordererOrgConfig(tab[0], ordererNum)
     buffer += jumptab(2, 0) + "PeerOrgs:"
     i = 2
     while (i < len(tab)):
@@ -104,19 +107,22 @@ def createCryptoconfig(tab):
     return (buffer)
 
 #Part of crypto-config.yaml - OrdererOrgs section
-def ordererOrgConfig(host):
+def ordererOrgConfig(host,ordererNum):
     rslt = "OrdererOrgs:"
     rslt += jumptab(2, 1) + "- Name: Orderer"
     rslt += jumptab(1, 1) + "  Domain: " + host + ".com"
     rslt += jumptab(2, 2) + "Specs:"
-    rslt += jumptab(1, 3) + "- Hostname: orderer"
+    for i in range (0,ordererNum):
+        rslt += jumptab(1, 3) + "- Hostname: orderer" + str(i)
+       
+    
     return (rslt)
 
 #Call functions in order to create configtx.yaml
-def createConfigtx(tabName):
+def createConfigtx(tabName,ordererNum):
     buffer = "Organizations:"
     buffer += setOrg(tabName)
-    buffer += createOrderer("kafka", "10", "98 MB", "512 KB", tabName[0])
+    buffer += createOrderer("kafka", "10", "98 MB", "512 KB", tabName[0],ordererNum)
     buffer += jumptab(2, 0) + "Application: &ApplicationDefaults"
     buffer += jumptab(2, 1) + "Organizations:"
     buffer += jumptab(2, 0) + "Profiles:"
@@ -139,6 +145,11 @@ def getArg():
         orgName.append(name)
         orgName.append(str(getNumber()))
     return (orgName)
+    
+def getOrdererNum():
+    ordererNum =int( input("Number of orderer : "))
+    
+    return (ordererNum)    
 
 #Get number of peer
 def getNumber():
@@ -246,9 +257,9 @@ def kafkaDockerFile(network, rank):
     return (rslt)
 
 #Part of docker-compose.yaml - Orderer section
-def ordererDockerFile(hostname, rank, network, arch):
-    rslt = jumptab(2, 1) + "orderer." + hostname + ":"
-    rslt += container_name("orderer." + hostname)
+def ordererDockerFile(hostname, rank, network, arch,ordererNum):
+    rslt = jumptab(2, 1) + "orderer" + str(ordererNum) +"." + hostname + ":"
+    rslt += container_name( "orderer" + str(ordererNum) +"."  + hostname)
     rslt += image("hyperledger/fabric-orderer:latest")
     rslt += working_dir("/opt/gopath/src/github.com/hyperledger/fabric")
     rslt += command("orderer")
@@ -268,7 +279,7 @@ def ordererDockerFile(hostname, rank, network, arch):
     rslt += list_value(str((7 + rank)) + "050:7050")
     rslt += jumptab(1, 2) + "volumes:"
     rslt += list_value("./channel-artifacts:/etc/hyperledger/configtx")
-    rslt += list_value("./crypto-config/ordererOrganizations/" + hostname + "/orderers/" + "orderer." + hostname +  "/msp:/etc/hyperledger/msp/orderer/msp")
+    rslt += list_value("./crypto-config/ordererOrganizations/" + hostname + "/orderers/" + "orderer" + str(ordererNum) +"." + hostname +  "/msp:/etc/hyperledger/msp/orderer/msp")
     rslt += jumptab(1, 2) + "depends_on:"
     rslt += list_value("kafka0")
     rslt += list_value("kafka1")
@@ -292,7 +303,7 @@ def couchDBDockerFile(arch, network, rank):
     return (rslt)
 
 #Part of docker-compose.yaml - Peer section
-def peerDockerFile(hostname, rank, network, arch, idd, name):
+def peerDockerFile(hostname, rank, network, arch, idd, name,ordererNum):
     rslt = jumptab(2, 1) + "peer" + str(idd) + "." + hostname + ":"
     rslt += container_name("peer" + str(idd) + "." + hostname)
     rslt += image("hyperledger/fabric-peer:latest")
@@ -319,19 +330,22 @@ def peerDockerFile(hostname, rank, network, arch, idd, name):
     rslt += list_value("./crypto-config/peerOrganizations/" + hostname + "/users:/etc/hyperledger/msp/users")
     rslt += jumptab(1, 2) + "depends_on:"
     if (arch != "test"):
-        rslt += list_value("orderer." + network + ".com")
+        for i in range (0,ordererNum):
+            rslt += list_value( "orderer" + str(i) +"."  + network + ".com")
     rslt += list_value("couchdb" + str(rank))
     rslt += jumptab(1, 2) + "networks:"
     rslt += list_value(network)
     return (rslt)
 
 #Call functions in order to create docker-composer.yaml
-def createDockerFile(tab):
+def createDockerFile(tab,ordererCount):
     network = tab[0]
     arch = tab[1]
     orgNB = int((len(tab) - 2) / 2)
     buffer = headerDockerFile(network)
-    buffer += ordererDockerFile(network + ".com", 0, network, "$ARCH")
+    for i in range (0, ordererCount):
+         buffer += ordererDockerFile(network + ".com", i, network, "$ARCH",i)
+   
     for i in range (0, 4):
         buffer += kafkaDockerFile(network, i)
     for i in range (0, 3):
@@ -341,7 +355,7 @@ def createDockerFile(tab):
     for k in range (0, orgNB):
         buffer += caDockerFile("$ARCH", tab[index - 1] + "." + network + ".com", k, network)
         for i in range (0, int(tab[index])):
-            buffer += peerDockerFile(tab[index - 1] + "." + network + ".com", rank, network, "$ARCH", i, tab[index - 1])
+            buffer += peerDockerFile(tab[index - 1] + "." + network + ".com", rank, network, "$ARCH", i, tab[index - 1],ordererCount)
             buffer += couchDBDockerFile("$ARCH", network, rank)
             rank += 1
         index += 2
@@ -366,10 +380,13 @@ def createConst():
     return (rslt)
 
 #Part of launch.sh
-def createJoinChannel(tab, channelId):
+def createJoinChannel(tab, channelId,ordererNum):
     index = 3
     orgNB = int((len(tab) - 2) / 2)
-    rslt = "function join_channel() {\ndocker exec peer0." + tab[2] + "." + tab[0] + ".com peer channel create -o orderer." + tab[0] + ".com:7050 -c " + channelId + " -f /etc/hyperledger/configtx/channel.tx"
+    ordererCount = 0
+    rslt="function join_channel() {\n"
+    for ordererCount in range(0,ordererNum):
+        rslt += "docker exec peer" +str(ordererCount) + "." + tab[2] + "." + tab[0] + ".com peer channel create -o orderer" + str(ordererCount) + "." + tab[0] + ".com:7050 -c " + channelId + " -f /etc/hyperledger/configtx/channel.tx\n"
     rslt += jumptab(1, 0) + "docker exec peer0." + tab[2] + "." + tab[0] + ".com cp " + channelId + ".block /etc/hyperledger/configtx"
     for i in range (0, orgNB):
         for k in range (0, int(tab[index])):
@@ -379,26 +396,27 @@ def createJoinChannel(tab, channelId):
     return (rslt)
 
 #Call functions in order to create launch.sh
-def createScript(tab):
+def createScript(tab,ordererNum):
     buffer = "#!/bin/bash"
     buffer += jumptab(2, 0) + createGenNeeded(tab[1], tab)
-    buffer += jumptab(2, 0) + createJoinChannel(tab, tab[1])
+    buffer += jumptab(2, 0) + createJoinChannel(tab, tab[1],ordererNum)
     buffer += jumptab(2, 0) + createConst()
     return (buffer)
 
 #Main function
 def createNewOrg():
     tab = getArg()
+    ordererNum = getOrdererNum()
     script = open("launch.sh", "w")
-    scriptBuffer = createScript(tab)
+    scriptBuffer = createScript(tab,ordererNum)
     script.write(scriptBuffer)
     script.close()
     dockerCompose = open("docker-compose.yml", "w")
     cryptoConfig = open("crypto-config.yaml", "w")
     configtx = open("configtx.yaml", "w")
-    composeBuffer = createDockerFile(tab)
-    cryptoBuffer = createCryptoconfig(tab)
-    configtxBuffer = createConfigtx(tab)
+    composeBuffer = createDockerFile(tab,ordererNum)
+    cryptoBuffer = createCryptoconfig(tab,ordererNum)
+    configtxBuffer = createConfigtx(tab,ordererNum)
     dockerCompose.write(composeBuffer)
     dockerCompose.close()
     cryptoConfig.write(cryptoBuffer)
