@@ -78,13 +78,58 @@ function change_dir_and_run_script() {
 	sudo ./env.sh
 }
 
+# Stops all running Docker containers
+# Checks the running container count
+function down_network() {
+	container_count=`docker ps -a  -q | grep imagename | wc -l`
+	
+	if [[ container_count -eq 0 ]]; then 
+		echo "No running Docker container"
+	else 
+		echo "--------------------------- Stopping Running Docker Containers ---------------------------"
+		docker stop $(docker ps -a -q)
+		echo "--------------------------- Stopped Running Docker Containers ---------------------------"
+	fi
+}
 
+# Removes all Docker containers
+# Checks the running container count
+function remove_network() {
+	container_count=`docker ps -a  -q | grep imagename | wc -l`
+
+	if [[ container_count -eq 0 ]]; then 
+		echo "Not exist Docker container"
+	else
+		echo "--------------------------- Removing Docker Containers ---------------------------"
+		docker stop $(docker ps -a -q)
+		docker rm $(docker ps -a -q)
+		echo "--------------------------- Removed Docker Containers ---------------------------"
+	fi
+}
+
+is_down=false
 # CLI interface
 while [[ $# -ge 1 ]]; do
 	case "$1" in
+
+		up)
+			echo "up"
+			change_dir_and_run_script
+			shift
+			;;
+		down)
+			down_network
+			shift
+			;;
+		remove)
+			remove_network
+			shift
+			;;
 		-h | --help)
 			echo "pre - prepares the environment for you"
 			echo " "
+			echo "Example: "
+			echo "	./network.sh up"
 			echo "pre [options]"
 			echo " "
 			echo "options:"
@@ -94,14 +139,22 @@ while [[ $# -ge 1 ]]; do
 			;;
 		-u | --update)
 			is_update_repository=true
+			update_repository
+			change_dir_and_run_script
 			shift
 			;;
 	esac
 done
-
-if $is_update_repository; then
-	update_repository
-fi
+# echo $is_down
+# if $is_down; then
+#	echo "is_down"
+#	down_network
+#	is_down=false
+#	echo "-------" $is_down
+# fi
+# if $is_update_repository; then
+#	update_repository
+# fi
 
 # if [ -d "${PWD}/Hyperledger-Fabric-Automate-Installer/" ]; then
 #	if $is_update_repository;  then
@@ -120,4 +173,4 @@ fi
 # copy_binaries
 # rm_fabric_samples_dir
 
-change_dir_and_run_script
+# change_dir_and_run_script
