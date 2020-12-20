@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# TODO Change the directories
-# TODO fix the --update situation
-# TODO update the GitHub link
-
 is_update_repository=false
 
 # Clones the repository
@@ -81,8 +77,8 @@ function change_dir_and_run_script() {
 # Stops all running Docker containers
 # Checks the running container count
 function down_network() {
-	container_count=`docker ps -a  -q | grep imagename | wc -l`
-	
+
+	container_count=`docker ps | grep "hyperledger" | wc -l`
 	if [[ container_count -eq 0 ]]; then 
 		echo "No running Docker container"
 	else 
@@ -92,10 +88,11 @@ function down_network() {
 	fi
 }
 
-# Removes all Docker containers
-# Checks the running container count
+# Removes all Docker containers related to "hyperledger"
+# Checks the container count
+# Removes all produced files, artifact, and config files
 function clear_network() {
-	container_count=`docker ps -a  -q | grep imagename | wc -l`
+	container_count=`docker images | grep "hyperledger" | wc -l`
 
 	if [[ container_count -eq 0 ]]; then 
 		echo "Not exist Docker container"
@@ -105,7 +102,6 @@ function clear_network() {
 		docker rm $(docker ps -a -q)
 		echo "--------------------------- Removed Docker Containers ---------------------------"
 	fi
-
 	
 	if [[ -f "${PWD}/docker-compose.yml" ]]; then
 		rm docker-compose.yml
@@ -117,47 +113,45 @@ function clear_network() {
 		echo "crypto-config.yaml is removed"
 	fi
 
-	
-	if [ -f "{PWD}/configtx.yaml" ]; then
+	if [ -f "${PWD}/configtx.yaml" ]; then
 		rm configtx.yaml
 		echo "configtx.yaml is removed"
 	fi
 
 	 
-	if [[ -f "{PWD}/launch.sh" ]]; then 
+	if [[ -f "${PWD}/launch.sh" ]]; then 
 		rm launch.sh
 		echo "launch.sh is removed"
 	fi 
 
-	if [ -d "{PWD}/crypto-config/" ]; then 
+	if [ -d "${PWD}/crypto-config/" ]; then 
 		rm -rf crypto-config/
 		echo "crypto-config/ directory is removed"
 	fi 
 
-	if [ -d "{PWD}/channel-artifacts/" ]; then 
+	if [ -d "${PWD}/channel-artifacts/" ]; then 
 		rm -rf channel-artifacts/
 		echo "channel-artifacts/ directory is removed"
 	fi
 }
 
-function up_network() {
+# After switching to sudo mode, network config files are created and running with this function
+function start_network() {
 	python3 gen.py
 	sudo chmod 755 launch.sh
 	./launch.sh
 }
-is_down=false
+
 # CLI interface
 while [[ $# -ge 1 ]]; do
 	case "$1" in
 
 		pre)
-			echo "pre"
 			change_dir_and_run_script
 			shift
 			;;
 		start)
-			echo "up"
-			up_network
+			start_network
 			shift
 			;;
 		down)
