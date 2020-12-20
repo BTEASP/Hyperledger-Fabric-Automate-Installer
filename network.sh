@@ -188,7 +188,8 @@ while [[ $# -ge 1 ]]; do
 			shift
 			;;
 		*)
-			echo "Invalid command"
+			echo "./network.sh: '$1' is not a network.sh command"
+			echo "See './network.sh --help'"
 			shift
 			;;
 	esac
