@@ -94,7 +94,7 @@ function down_network() {
 
 # Removes all Docker containers
 # Checks the running container count
-function remove_network() {
+function clear_network() {
 	container_count=`docker ps -a  -q | grep imagename | wc -l`
 
 	if [[ container_count -eq 0 ]]; then 
@@ -105,32 +105,82 @@ function remove_network() {
 		docker rm $(docker ps -a -q)
 		echo "--------------------------- Removed Docker Containers ---------------------------"
 	fi
+
+	
+	if [[ -f "${PWD}/docker-compose.yml" ]]; then
+		rm docker-compose.yml
+		echo "docker-compose.yml is removed" 
+	fi
+
+	if [ -f "${PWD}/crypto-config.yaml" ]; then
+		rm crypto-config.yaml
+		echo "crypto-config.yaml is removed"
+	fi
+
+	
+	if [ -f "{PWD}/configtx.yaml" ]; then
+		rm configtx.yaml
+		echo "configtx.yaml is removed"
+	fi
+
+	 
+	if [[ -f "{PWD}/launch.sh" ]]; then 
+		rm launch.sh
+		echo "launch.sh is removed"
+	fi 
+
+	if [ -d "{PWD}/crypto-config/" ]; then 
+		rm -rf crypto-config/
+		echo "crypto-config/ directory is removed"
+	fi 
+
+	if [ -d "{PWD}/channel-artifacts/" ]; then 
+		rm -rf channel-artifacts/
+		echo "channel-artifacts/ directory is removed"
+	fi
 }
 
+function up_network() {
+	python3 gen.py
+	sudo chmod 755 launch.sh
+	./launch.sh
+}
 is_down=false
 # CLI interface
 while [[ $# -ge 1 ]]; do
 	case "$1" in
 
-		up)
-			echo "up"
+		pre)
+			echo "pre"
 			change_dir_and_run_script
+			shift
+			;;
+		start)
+			echo "up"
+			up_network
 			shift
 			;;
 		down)
 			down_network
 			shift
 			;;
-		remove)
-			remove_network
+		clear)
+			clear_network
 			shift
 			;;
 		-h | --help)
-			echo "pre - prepares the environment for you"
+			echo "network.sh - prepares the environment and starts the network for you"
 			echo " "
-			echo "Example: "
-			echo "	./network.sh up"
-			echo "pre [options]"
+			echo "	pre 	prepares the environment for running network"
+			echo "	start	starts the network"
+			echo "	down	stops the Docker containers and downs the network"
+			echo "	clear	clear all Docker containers and produced files, artifacts"
+			echo "Examples: "
+			echo "	./network.sh pre"
+			echo "	./network.sh start"
+			echo "	./network.sh down"
+			echo "	./network.sh clear"
+			echo "network.sh [options]"
 			echo " "
 			echo "options:"
 			echo "-h, --help		show  brief help"
