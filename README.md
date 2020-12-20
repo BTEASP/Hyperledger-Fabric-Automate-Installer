@@ -7,7 +7,7 @@ You need to run `network.sh` file to prepare and start to network. You need to s
 Example:
 
 ```
-$ chmod +x pre.sh
+$ chmod +x network.sh
 $ ./network.sh pre
 $ ./network.sh start
 ``` 
