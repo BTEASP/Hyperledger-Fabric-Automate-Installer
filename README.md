@@ -2,24 +2,37 @@
 
 ## RUN
 
-There are 2 different shell script files. The `pre.sh` file provides the commands that before running `gen.py` file. When your directory changes to the root directory, you can run `pre_sudo.sh` command. If you are running `pre.sh` at the first time, you need to change the mode of the script file with `chmod +x`. It basically changes the permission that it makes the file executable.
+You need to run `network.sh` file to prepare and start to network. You need to start with `./network.sh pre`. Then, your directory changes to the root directory. You should run `./network.sh start` command to start network. You will enter your network's name, organization name, peer numbers, and orderer number. If you are running `network.sh` at the first time, you need to change the mode of the script file with `chmod +x`. It basically changes the permission that it makes the file executable.
 
 Example:
 
 ```
 $ chmod +x pre.sh
-$ ./pre.sh
-$ ./pre_sudo.sh
+$ ./network.sh pre
+$ ./network.sh start
 ``` 
-## `pre.sh` Option
+
+Above commands start your network. If you want to down your network, you can run following command.
+
+```
+$ ./network.sh down
+``` 
+
+If you wwant to clear everything like Docker containers, files, folders, you can run following command.
+
+```
+$ ./network.sh clear
+```
+
+## `network.sh` Option
 
 You can update the repository by using `-u` or `--update` flags. You can run like this:
 
-`$ ./pre.sh -u`
+`$ ./network.sh -u`
 
 or 
 
-`$ ./pre.sh --update`
+`$ ./network.sh --update`
 
 Hyperledger fabric tools
 
