@@ -187,6 +187,10 @@ while [[ $# -ge 1 ]]; do
 			change_dir_and_run_script
 			shift
 			;;
+		*)
+			echo "Invalid command"
+			shift
+			;;
 	esac
 done
 # echo $is_down
