@@ -17,7 +17,7 @@ Above commands start your network. If you want to down your network, you can run
 ```
 $ ./network.sh down
 ``` 
-After stopping the network, you may want to restart network again. For this purpose, you can use `up` command as follow. 
+After stopping the network, you may want to restart the network again. For this purpose, you can use the `up` command as follows.
 
 ```
 $ ./network.sh up
@@ -25,7 +25,7 @@ $ ./network.sh up
 
 :exclamation: **Note:** Be sure that you do not delete any file or folder from the project after stopping the network. Otherwise, you will probably have some problem and the network do not restart again.
 
-If you wwant to clear everything like Docker containers, files, folders, you can run following command.
+If you want to clear everything like Docker containers, files, folders, you can run the following command.
 
 ```
 $ ./network.sh clear
