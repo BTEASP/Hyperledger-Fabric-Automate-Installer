@@ -142,6 +142,70 @@ function start_network() {
 	./launch.sh
 }
 
+# Restarts the network
+# Checks the files and folders before the running network
+function up_network() {
+	if [ ! -d "${PWD}/channel-artifacts/" ]; then 
+		echo "ERROR: 'channel-artifacts/' folder not exists"
+		echo "You should clear all produced files and folders, then run network again."
+		echo "You can clear all produced files and folders by using './network.sh clear'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -d "${PWD}/crypto-config/" ]; then
+		echo "ERROR: 'crypto-config/' folder not exists"
+		echo "You should clear all produced files and folders, then run network again."
+		echo "You can clear all produced files and folders by using './network.sh clear'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/crypto-config.yaml" ]; then
+		echo "ERROR: 'crypto-config.yaml' file not exists"
+		echo "You should clear all produced files and folders, then run network again."
+		echo "You can clear all produced files and folder by using './network.sh clear'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/docker-compose.yml" ]; then
+		echo "ERROR: 'docker-compose.yml' file not exists"
+		echo "You should clear all produced files and folders, then run network again."
+		echo "You can clear all produced files and folder by using './network.sh clear'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/launch.sh" ]; then
+		echo "ERROR: 'launch.sh' file not exists"
+		echo "You should clear all produced files and folders, then run network again."
+		echo "You can clear all produced files and folder by using './network.sh clear'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/configtxgen" ]; then
+		echo "ERROR: 'configtxgen' file not exists"
+		echo "You should update the repository, then run network again."
+		echo "You can update the repository by using './network.sh --update'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/cryptogen" ]; then
+		echo "ERROR: 'cryptogen' file not exists"
+		echo "You should update the repository, then run network again."
+		echo "You can update the repository by using './network.sh --update'"
+		echo "See './network.sh --help'"
+		exit
+	elif [ ! -f "${PWD}/docker-compose-base.yml" ]; then
+		echo "ERROR: 'docker-compose-base.yml' file not exists"
+		echo "You should update the repository, then run network again."
+		echo "You can update the repository by using './network.sh --update'"
+		echo "See './network.sh --help'"
+		exit
+	# elif [ ! -f "${PWD}/gen.py" ]; then
+	#	echo "ERROR: 'gen.py' file not exists"
+	#	echo "You should update the repository, then run network again."
+	#	echo "You can update the repository by using './network.sh --update'"
+	#	echo "See './network.sh --help'"
+	else
+		sudo chmod 755 launch.sh
+		./launch.sh
+	fi
+
+	echo "Done."
+}
+
 # CLI interface
 while [[ $# -ge 1 ]]; do
 	case "$1" in
@@ -162,6 +226,10 @@ while [[ $# -ge 1 ]]; do
 			clear_network
 			shift
 			;;
+		up)
+			up_network
+			shift
+			;;
 		-h | --help)
 			echo "network.sh - prepares the environment and starts the network for you"
 			echo " "
@@ -169,11 +237,13 @@ while [[ $# -ge 1 ]]; do
 			echo "	start	starts the network"
 			echo "	down	stops the Docker containers and downs the network"
 			echo "	clear	clear all Docker containers and produced files, artifacts"
+			echo "	up	restarts your last network in a short way. None of the files or folders should be removed to restart successfully."
 			echo "Examples: "
 			echo "	./network.sh pre"
 			echo "	./network.sh start"
 			echo "	./network.sh down"
 			echo "	./network.sh clear"
+			echo "	./network.sh up"
 			echo "network.sh [options]"
 			echo " "
 			echo "options:"
@@ -194,32 +264,3 @@ while [[ $# -ge 1 ]]; do
 			;;
 	esac
 done
-# echo $is_down
-# if $is_down; then
-#	echo "is_down"
-#	down_network
-#	is_down=false
-#	echo "-------" $is_down
-# fi
-# if $is_update_repository; then
-#	update_repository
-# fi
-
-# if [ -d "${PWD}/Hyperledger-Fabric-Automate-Installer/" ]; then
-#	if $is_update_repository;  then
-#		update_repository
-#		echo "Updating..."
-#	fi
-# fi
-
-# if [ -d "${PWD}/fabric-samples/" ]; then
-#	rm_fabric_samples_dir
-#	install_binaries
-# else
-#	install_binaries
-# fi
-
-# copy_binaries
-# rm_fabric_samples_dir
-
-# change_dir_and_run_script
