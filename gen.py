@@ -146,8 +146,8 @@ def getArg():
         orgName.append(str(getNumber()))
     return (orgName)
     
-def getOrdererNum():
-    ordererNum =int( input("Number of orderer : "))
+def getOrdererNum(peerNum):
+    ordererNum =int( input("Number of orderer  less than or equal " + str(peerNum) + " : "))
     
     return (ordererNum)    
 
@@ -406,7 +406,7 @@ def createScript(tab,ordererNum):
 #Main function
 def createNewOrg():
     tab = getArg()
-    ordererNum = getOrdererNum()
+    ordererNum = getOrdererNum(tab[3])
     script = open("launch.sh", "w")
     scriptBuffer = createScript(tab,ordererNum)
     script.write(scriptBuffer)
